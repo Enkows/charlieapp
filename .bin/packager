@@ -1,0 +1,36 @@
+#!/usr/bin/env coffee
+_ = require 'lodash'
+packager = require 'electron-packager'
+exec = require('child_process').exec
+
+cwd = process.cwd()
+
+cmd = [
+  "mkdir -p dist"
+  "rsync -a --delete-after --exclude='.git' --exclude='#{cwd}/dist/' #{cwd}/ #{cwd}/dist/source"
+]
+
+exec cmd.join('&&'), (error, stdout, stderr) ->
+  opts =
+    name: 'Charlie'
+    dir: "#{cwd}/dist/source"
+    version: '0.28.2'
+    prune: true
+    asar: true
+    ignore: ['/\.bin/', '/renderer($|/)', '/webpack\.config\.js']
+
+  # Build Darwin
+  do (opts) ->
+    opts = _.clone opts
+    opts.platform = 'darwin'
+    opts.arch = 'x64'
+    opts.out = "#{cwd}/dist/releases/osx/"
+    packager opts, (err, appPath) ->
+
+  # Build Win32 x64
+  do (opts) ->
+    opts = _.clone opts
+    opts.platform = 'win32'
+    opts.arch = 'x64'
+    opts.out = './dist/releases/win32-x64/'
+    packager opts, (err, appPath) ->
